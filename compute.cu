@@ -79,3 +79,40 @@ void compute() {
     cudaFree(dVel);
     cudaFree(dMass);
 }
+
+
+void compute() {
+    // Allocate GPU memory for accels, hPos, hVel, and mass
+    vector3* dAccels;
+    cudaMalloc((void**)&dAccels, sizeof(vector3) * NUMENTITIES * NUMENTITIES);
+
+    vector3* dPos;
+    cudaMalloc((void**)&dPos, sizeof(vector3) * NUMENTITIES);
+    cudaMemcpy(dPos, hPos, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
+
+    vector3* dVel;
+    cudaMalloc((void**)&dVel, sizeof(vector3) * NUMENTITIES);
+    cudaMemcpy(dVel, hVel, sizeof(vector3) * NUMENTITIES, cudaMemcpyHostToDevice);
+
+    double* dMass;
+    cudaMalloc((void**)&dMass, sizeof(double) * NUMENTITIES);
+    cudaMemcpy(dMass, mass, sizeof(double) * NUMENTITIES, cudaMemcpyHostToDevice);
+
+    // Define grid and block dimensions
+    dim3 blocksPerGrid((NUMENTITIES + BLOCK_SIZE - 1) / BLOCK_SIZE, (NUMENTITIES + BLOCK_SIZE - 1) / BLOCK_SIZE, 1);
+    dim3 threadsPerBlock(BLOCK_SIZE, BLOCK_SIZE, 1);
+
+    // Launch the kernel to compute accelerations and update positions
+    computeAccelsAndSum<<<blocksPerGrid, threadsPerBlock>>>(dAccels, dPos, dMass, dVel);
+
+    // Synchronize to ensure the kernel is complete
+    cudaDeviceSynchronize();
+
+    // Copy results from device to host if needed
+
+    // Free GPU memory
+    cudaFree(dAccels);
+    cudaFree(dPos);
+    cudaFree(dVel);
+    cudaFree(dMass);
+}
