@@ -44,7 +44,7 @@ __global__ void computeAccelsAndSum(vector3* accels, vector3* hPos, double* mass
     }
 }
 
-void computeOnGPU() {
+void compute() {
     // Allocate GPU memory for accels, hPos, hVel, and mass
     vector3* dAccels;
     cudaMalloc((void**)&dAccels, sizeof(vector3) * NUMENTITIES * NUMENTITIES);
